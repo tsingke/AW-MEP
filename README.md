@@ -1,5 +1,3 @@
-# AW-MEP
-Adaptive Weighted Multi-Expression Programmin
 
 # AW-MEP  
 Adaptive Weighted Multi-Expression Programming for Symbolic Regression  
@@ -8,12 +6,24 @@ Adaptive Weighted Multi-Expression Programming for Symbolic Regression
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/tsingke/AW-MEP)  
 [![GitHub stars](https://img.shields.io/github/stars/tsingke/AW-MEP.svg)](https://github.com/tsingke/AW-MEP/stargazers)  
 
+**Title**: Adaptive Weighted Multi-Expression Programming
 
+```
+ Authors：Xin Yin, Qingke Zhang*, Junqing Li, Huaxiang Zhang
+```
+> 1. School of Information Science and Engineering, Shandong Normal University, Jinan 250358, China
+> 
+> 2. School of Information Science and Engineering, Yunnan Normal University,  Yunan 650500, China
+> 
+> 3. Aerospace InformationTechnology University, Jinan, 250200, Chin
+>
+> 
+> Corresponding Author: **Qingke Zhang** ， Email: tsingke@sdnu.edu.cn ， Tel :  +86-13953128163
+
+This paper is being considered for submission to the Elsevier journal
 
 ## 🚀 Project Overview  
-Symbolic regression focuses on discovering **interpretable mathematical expressions** to model complex nonlinear relationships in data. Traditional Multi-Expression Programming (MEP) is elegant, yet often limited by premature convergence, fixed operator schemes, and sub-optimal exploration–exploitation balance.  
-
-To overcome these limitations, we introduce **Adaptive Weighted Multi-Expression Programming (AW-MEP)** — a novel framework that integrates multiple self-regulating mechanisms for dynamic control of evolution. AW-MEP is designed to deliver improved convergence, higher generalization, and enhanced search efficiency for real-world symbolic modeling tasks.  
+Symbolic regression focuses on discovering **interpretable mathematical expressions** to model complex nonlinear relationships in data. Traditional Multi-Expression Programming (MEP) is elegant, yet often limited by premature convergence, fixed operator schemes, and sub-optimal exploration–exploitation balance. To overcome these limitations, we introduce **Adaptive Weighted Multi-Expression Programming (AW-MEP)** — a novel framework that integrates multiple self-regulating mechanisms for dynamic control of evolution. AW-MEP is designed to deliver improved convergence, higher generalization, and enhanced search efficiency for real-world symbolic modeling tasks.  
 
 ## 🔍 Key Innovations  
 1. **Dynamic Operator Weighting Strategy**: Continuously assesses and updates the importance of genetic operators based on contribution feedback, guiding search direction and eliminating redundant operations.  
@@ -26,6 +36,7 @@ To overcome these limitations, we introduce **Adaptive Weighted Multi-Expression
 > Quantitative gains: Mean Squared Error (MSE) reduction of **7%–47%**, up to **30% faster convergence**, and lower computational cost.  
 
 ## 🧩 Getting Started  
+
 ### ✅ Prerequisites  
 - MATLAB R2020a (or later)  
 - Symbolic Math Toolbox (optional for expression simplification)  
@@ -46,3 +57,9 @@ Contributions (bug reports, feature requests, pull-requests) are welcomed! Pleas
 
 This project is licensed under the MIT License — see the LICENSE
  file for details.
+
+ ## 🙏 Acknowledgements
+
+**We would like to express our sincere gratitude to editors and the anonymous reviewers for taking the time to review our paper.** 
+
+This work is supported by the National Natural Science Foundation of China (Grant Nos. 62006144) 
