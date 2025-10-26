@@ -13,7 +13,7 @@ Adaptive Weighted Multi-Expression Programming for Symbolic Regression
 > 
 > 2. School of Information Science and Engineering, Yunnan Normal University,  Yunan 650500, China
 > 
-> 3. Aerospace InformationTechnology University, Jinan, 250200, Chin
+> 3. Aerospace InformationTechnology University, Jinan, 250200, China
 >
 > 
 > Corresponding Author: **Qingke Zhang** ， Email: tsingke@sdnu.edu.cn ， Tel :  +86-13953128163
