@@ -1,7 +1,6 @@
 /**************************************************************************
 *  GEP quick-replace for MEP  (single file, ready to compile)
-*  ×÷Õß£ºkimi
-*  ±àÒë£ºcl /O2 gep.cpp  »ò  g++ -O3 gep.cpp -o gep
+*  ç¼–è¯‘ï¼šcl /O2 gep.cpp  æˆ–  g++ -O3 gep.cpp -o gep
 **************************************************************************/
 #include <cstdio>
 #include <cstdlib>
@@ -14,39 +13,39 @@
 #define PROBLEM_REGRESSION 0
 #define PROBLEM_BINARY_CLASSIFICATION 1
 
-/*---------- Ëã×Ó ----------*/
+/*---------- ç®—å­ ----------*/
 enum { OP_ADD = 0, OP_SUB, OP_MUL, OP_DIV, OP_SIN, OP_COS, OP_TAN, OP_LOG, OP_EXP, OP_SQRT, OP_POW, OP_MIN, OP_MAX, OP_ABS, OP_FLOOR, OP_CEIL, OP_AND, OP_OR, OP_NUM };
 static const char* op_str[] = { "+","-","*","/","sin","cos","tan","log","exp","sqrt","pow","min","max","abs","floor","ceil","&","|" };
 static const int   op_arity[] = { 2,2,2,2,1,1,1,1,1,1,2,2,2,1,1,1,2,2 };
 
-/*---------- ²ÎÊı ----------*/
+/*---------- å‚æ•° ----------*/
 struct GepParam {
-    int head, tail;              // È¾É«Ìå = head + tail
-    int gene_cnt;                // Ã¿ÌõÈ¾É«Ìåº¬¼¸¸ö»ùÒò£¨¶à»ùÒò = ¶àÊä³ö/×Ó±í´ïÊ½£©
+    int head, tail;              // æŸ“è‰²ä½“ = head + tail
+    int gene_cnt;                // æ¯æ¡æŸ“è‰²ä½“å«å‡ ä¸ªåŸºå› ï¼ˆå¤šåŸºå›  = å¤šè¾“å‡º/å­è¡¨è¾¾å¼ï¼‰
     int code_len;                // = (head+tail)*gene_cnt
     int pop_size, generations;
     double mut_rate, cross_rate;
     int    num_var, num_const;
     double const_min, const_max;
-    int    problem_type;         // 0=»Ø¹é 1=¶ş·ÖÀà
-    double class_th;             // ·ÖÀàãĞÖµ
-    /* ¸ÅÂÊ */
-    double p_op, p_var, p_const; // ³õÊ¼»¯ÓÃ£¬ºÍÎª1
+    int    problem_type;         // 0=å›å½’ 1=äºŒåˆ†ç±»
+    double class_th;             // åˆ†ç±»é˜ˆå€¼
+    /* æ¦‚ç‡ */
+    double p_op, p_var, p_const; // åˆå§‹åŒ–ç”¨ï¼Œå’Œä¸º1
 };
 
-/*---------- È¾É«Ìå ----------*/
+/*---------- æŸ“è‰²ä½“ ----------*/
 struct Chrom {
-    int* code;                 // ÏßĞÔÈ¾É«Ìå
-    double* con;                  // ³£Êı³Ø
+    int* code;                 // çº¿æ€§æŸ“è‰²ä½“
+    double* con;                  // å¸¸æ•°æ± 
     double fitness;
-    int    best_gene;            // ×îÓÅ×Ó±í´ïÊ½ĞòºÅ
+    int    best_gene;            // æœ€ä¼˜å­è¡¨è¾¾å¼åºå·
 };
 
-/*---------- ¹¤¾ß ----------*/
+/*---------- å·¥å…· ----------*/
 inline double rand01() { return rand() / (double)RAND_MAX; }
 inline int    randInt(int a, int b) { return a + rand() % (b - a + 1); }
 
-/*---------- ·ÖÅä/ÊÍ·Å ----------*/
+/*---------- åˆ†é…/é‡Šæ”¾ ----------*/
 void alloc_chrom(Chrom& c, const GepParam& p) {
     c.code = new int[p.code_len];
     c.con = new double[p.num_const];
@@ -55,32 +54,32 @@ void free_chrom(Chrom& c) {
     delete[] c.code; delete[] c.con;
 }
 
-/*---------- ½âÂë ----------*/
-struct Node { int op; double c; int left, right; }; // ¼òµ¥Ê÷½Úµã
+/*---------- è§£ç  ----------*/
+struct Node { int op; double c; int left, right; }; // ç®€å•æ ‘èŠ‚ç‚¹
 Node node_buf[2048]; int node_cnt;
 
 int decode_gene(const int* gene, int h, int t, int num_var, int& pos, int& arity_needed)
-/* °Ñ gene[pos..] Õ¹¿ª³ÉÒ»¿ÃÊ÷£¬·µ»Ø¸ù½ÚµãÔÚ node_buf µÄÏÂ±ê */
+/* æŠŠ gene[pos..] å±•å¼€æˆä¸€æ£µæ ‘ï¼Œè¿”å›æ ¹èŠ‚ç‚¹åœ¨ node_buf çš„ä¸‹æ ‡ */
 {
     int idx = node_cnt++;
     Node& nd = node_buf[idx];
-    if (pos >= h) { // tail Çø£¬Ö»ÄÜÊÇÖÕ¶Ë
+    if (pos >= h) { // tail åŒºï¼Œåªèƒ½æ˜¯ç»ˆç«¯
         if (rand01() < 0.5 && num_var > 0) { nd.op = -1; nd.left = randInt(0, num_var - 1); nd.right = -1; }
         else { nd.op = -2; nd.c = 0;                   nd.right = -1; }
         arity_needed = 0;
         return idx;
     }
     int op = gene[pos++];
-    if (op < 0) { // ÖÕ¶Ë
-        if (op < -100) { // ³£ÊıÕ¼Î»
+    if (op < 0) { // ç»ˆç«¯
+        if (op < -100) { // å¸¸æ•°å ä½
             nd.op = -2; nd.c = 0; nd.left = nd.right = -1;
         }
-        else { // ±äÁ¿
+        else { // å˜é‡
             nd.op = -1; nd.left = -op - 1; nd.right = -1;
         }
         arity_needed = 0;
     }
-    else { // º¯Êı
+    else { // å‡½æ•°
         nd.op = op; nd.left = nd.right = -1;
         int need1, need2 = 0;
         nd.left = decode_gene(gene, h, t, num_var, pos, need1);
@@ -90,7 +89,7 @@ int decode_gene(const int* gene, int h, int t, int num_var, int& pos, int& arity
     return idx;
 }
 
-/*---------- Ê÷ÇóÖµ ----------*/
+/*---------- æ ‘æ±‚å€¼ ----------*/
 double eval_tree(int root, const double* var, const double* con)
 {
     const Node& nd = node_buf[root];
@@ -121,13 +120,13 @@ double eval_tree(int root, const double* var, const double* con)
     return 0;
 }
 
-/*---------- ÏßĞÔ»Ø¹éµ÷³£Êı ----------*/
+/*---------- çº¿æ€§å›å½’è°ƒå¸¸æ•° ----------*/
 void refine_constants(Chrom& c, const GepParam& p, const double** x, const double* y, int n)
 {
-    /* ½ö¶Ô³£ÊıÕ¼Î»·û×ö×îĞ¡¶ş³Ë£¬½á¹¹²»±ä */
+    /* ä»…å¯¹å¸¸æ•°å ä½ç¬¦åšæœ€å°äºŒä¹˜ï¼Œç»“æ„ä¸å˜ */
     static double A[10000][32], b[10000];
     int m = std::min(n, 10000), cols = 0;
-    for (int i = 0; i < p.num_const; i++) cols++; // Ã¿¸öÕæÊµ³£Êı
+    for (int i = 0; i < p.num_const; i++) cols++; // æ¯ä¸ªçœŸå®å¸¸æ•°
     if (cols == 0) return;
     for (int k = 0; k < m; k++) {
         double tmp_var[64];
@@ -140,7 +139,7 @@ void refine_constants(Chrom& c, const GepParam& p, const double** x, const doubl
         }
         b[k] = y[k];
     }
-    /* Õı¹æ·½³Ì */
+    /* æ­£è§„æ–¹ç¨‹ */
     static double AtA[32][32], Atb[32];
     memset(AtA, 0, sizeof(AtA)); memset(Atb, 0, sizeof(Atb));
     for (int i = 0; i < cols; i++)
@@ -148,7 +147,7 @@ void refine_constants(Chrom& c, const GepParam& p, const double** x, const doubl
             for (int k = 0; k < m; k++) AtA[i][j] += A[k][i] * A[k][j];
     for (int i = 0; i < cols; i++)
         for (int k = 0; k < m; k++) Atb[i] += A[k][i] * b[k];
-    /* ¸ßË¹ÏûÔª */
+    /* é«˜æ–¯æ¶ˆå…ƒ */
     for (int i = 0; i < cols; i++) {
         for (int j = i + 1; j < cols; j++) {
             double rate = AtA[j][i] / AtA[i][i];
@@ -162,7 +161,7 @@ void refine_constants(Chrom& c, const GepParam& p, const double** x, const doubl
     }
 }
 
-/*---------- ÊÊÓ¦¶È ----------*/
+/*---------- é€‚åº”åº¦ ----------*/
 void fitness(Chrom& c, const GepParam& p, const double** x, const double* y, int n)
 {
     double best_err = 1e308; int best_g = 0;
@@ -184,7 +183,7 @@ void fitness(Chrom& c, const GepParam& p, const double** x, const double* y, int
     c.best_gene = best_g;
 }
 
-/*---------- ³õÊ¼»¯ ----------*/
+/*---------- åˆå§‹åŒ– ----------*/
 void random_chrom(Chrom& c, const GepParam& p)
 {
     for (int i = 0; i < p.num_const; i++) c.con[i] = p.const_min + rand01() * (p.const_max - p.const_min);
@@ -205,7 +204,7 @@ void random_chrom(Chrom& c, const GepParam& p)
     }
 }
 
-/*---------- ±äÒì ----------*/
+/*---------- å˜å¼‚ ----------*/
 void mutate(Chrom& c, const GepParam& p)
 {
     for (int g = 0; g < p.gene_cnt; g++) {
@@ -223,15 +222,15 @@ void mutate(Chrom& c, const GepParam& p)
             else                            gene[i] = -(p.num_var + randInt(0, p.num_const - 1) + 1) - 2000;
         }
     }
-    /* ³£Êı */
+    /* å¸¸æ•° */
     for (int i = 0; i < p.num_const; i++) if (rand01() < p.mut_rate)
         c.con[i] = p.const_min + rand01() * (p.const_max - p.const_min);
 }
 
-/*---------- ½»²æ ----------*/
+/*---------- äº¤å‰ ----------*/
 void crossover(const Chrom& p1, const Chrom& p2, const GepParam& p, Chrom& o1, Chrom& o2)
 {
-    /* µ¥µã½»²æ£¬°´»ùÒòÇĞ */
+    /* å•ç‚¹äº¤å‰ï¼ŒæŒ‰åŸºå› åˆ‡ */
     int cut = randInt(0, p.gene_cnt);
     int gs = p.head + p.tail;
     for (int g = 0; g < cut; g++) {
@@ -242,7 +241,7 @@ void crossover(const Chrom& p1, const Chrom& p2, const GepParam& p, Chrom& o1, C
         memcpy(o1.code + g * gs, p2.code + g * gs, gs * sizeof(int));
         memcpy(o2.code + g * gs, p1.code + g * gs, gs * sizeof(int));
     }
-    /* ³£Êı */
+    /* å¸¸æ•° */
     int cc = randInt(0, p.num_const);
     memcpy(o1.con, p1.con, cc * sizeof(double));
     memcpy(o2.con, p2.con, cc * sizeof(double));
@@ -250,7 +249,7 @@ void crossover(const Chrom& p1, const Chrom& p2, const GepParam& p, Chrom& o1, C
     memcpy(o2.con + cc, p1.con + cc, (p.num_const - cc) * sizeof(double));
 }
 
-/*---------- Ñ¡Ôñ ----------*/
+/*---------- é€‰æ‹© ----------*/
 int tournament(const Chrom* pop, int n, int k = 3)
 {
     int best = randInt(0, n - 1);
@@ -260,7 +259,7 @@ int tournament(const Chrom* pop, int n, int k = 3)
     }
     return best;
 }
-/*---------- ¸¨Öú£ºÈ¾É«Ìå¿½±´ ----------*/
+/*---------- è¾…åŠ©ï¼šæŸ“è‰²ä½“æ‹·è´ ----------*/
 inline void copy_chrom(Chrom& dst, const Chrom& src, const GepParam& p)
 {
     memcpy(dst.code, src.code, p.code_len * sizeof(int));
@@ -268,14 +267,14 @@ inline void copy_chrom(Chrom& dst, const Chrom& src, const GepParam& p)
     dst.fitness = src.fitness;
     dst.best_gene = src.best_gene;
 }
-/*---------- Ö÷Ñ­»· ----------*/
+/*---------- ä¸»å¾ªç¯ ----------*/
 Chrom evolve(const GepParam& p, const double** x, const double* y, int n)
 {
     Chrom* pop = new Chrom[p.pop_size];
     for (int i = 0; i < p.pop_size; i++) alloc_chrom(pop[i], p);
     Chrom o1, o2; alloc_chrom(o1, p); alloc_chrom(o2, p);
 
-    /* ³õÊ¼ÖÖÈº */
+    /* åˆå§‹ç§ç¾¤ */
     for (int i = 0; i < p.pop_size; i++) {
         random_chrom(pop[i], p);
         refine_constants(pop[i], p, x, y, n);
@@ -284,7 +283,7 @@ Chrom evolve(const GepParam& p, const double** x, const double* y, int n)
     std::sort(pop, pop + p.pop_size, [](const Chrom& a, const Chrom& b) {return a.fitness < b.fitness; });
     printf("gen 0 best=%.6f\n", pop[0].fitness);
 
-    /* Ñİ»¯ */
+    /* æ¼”åŒ– */
     for (int g = 1; g <= p.generations; g++) {
         for (int k = 0; k < p.pop_size; k += 2) {
             int i1 = tournament(pop, p.pop_size);
@@ -294,7 +293,7 @@ Chrom evolve(const GepParam& p, const double** x, const double* y, int n)
             mutate(o1, p); mutate(o2, p);
             refine_constants(o1, p, x, y, n); refine_constants(o2, p, x, y, n);
             fitness(o1, p, x, y, n); fitness(o2, p, x, y, n);
-            /* Ìæ´ú×î²îµÄ */
+            /* æ›¿ä»£æœ€å·®çš„ */
             if (o1.fitness < pop[p.pop_size - 1].fitness) {
                 copy_chrom(pop[p.pop_size - 1], o1, p);
                 std::sort(pop, pop + p.pop_size, [](const Chrom& a, const Chrom& b) {return a.fitness < b.fitness; });
@@ -314,7 +313,7 @@ Chrom evolve(const GepParam& p, const double** x, const double* y, int n)
     return best;
 }
 
-/*---------- ÎÄ¼ş¶ÁÈ¡ ----------*/
+/*---------- æ–‡ä»¶è¯»å– ----------*/
 bool read_data(const char* file, double**& x, double*& y, int& n, int& var)
 {
     FILE* f = nullptr;
@@ -343,7 +342,7 @@ bool read_data(const char* file, double**& x, double*& y, int& n, int& var)
     return true;
 }
 
-/*---------- Ö÷º¯Êı ----------*/
+/*---------- ä¸»å‡½æ•° ----------*/
 int main()
 {
     srand((unsigned)time(NULL));
@@ -363,12 +362,12 @@ int main()
     p.problem_type = PROBLEM_REGRESSION;
 
     double** x; double* y; int n, var;
-    if (!read_data("C:/Users/lenovo/Desktop/ÂÛÎÄ1Êı¾İ/synthetic_dataset_5.txt", x, y, n, var)) { puts("file error"); return 0; }
+    if (!read_data("C:/Users/lenovo/Desktop/è®ºæ–‡1æ•°æ®/synthetic_dataset_5.txt", x, y, n, var)) { puts("file error"); return 0; }
     p.num_var = var;
 
     Chrom best = evolve(p, const_cast<const double**>(x), y, n);
     printf("\nBest train RMSE=%.6f  gene=%d\n", sqrt(best.fitness), best.best_gene);
-    /* ´òÓ¡±í´ïÊ½ÂÔ£¬¿É×Ô¼ºÕ¹¿ª best.code */
+    /* æ‰“å°è¡¨è¾¾å¼ç•¥ï¼Œå¯è‡ªå·±å±•å¼€ best.code */
 
     for (int i = 0; i < n; i++) delete[] x[i];
     delete[] x; delete[] y;
