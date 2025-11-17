@@ -1,10 +1,5 @@
 //---------------------------------------------------------------------------
-//	Multi Expression Programming - basic source code for solving symbolic regression and binary classification problems
-//	author: Mihai Oltean  
-//	mihai.oltean@gmail.com
-//	Last update on: 2022.1.23
-
-//	License: MIT
+//	Multi Expression Programming
 //---------------------------------------------------------------------------
 
 //   More info at:  
@@ -39,7 +34,7 @@
 #define PROBLEM_REGRESSION 0
 #define PROBLEM_BINARY_CLASSIFICATION 1
 
-#define NUM_Operators 18//¶¨Òå²Ù×÷·ûÊıÁ¿£¬ÓĞ5¸ö²Ù×÷·û
+#define NUM_Operators 18//å®šä¹‰æ“ä½œç¬¦æ•°é‡ï¼Œæœ‰5ä¸ªæ“ä½œç¬¦
 
 #define ADD_OP -1 // +
 #define DIF_OP -2 // -
@@ -50,13 +45,13 @@
 #define POW_OP -7  // ^
 #define AND_OP -8  // &
 #define OR_OP -9   // |
-#define TAN_OP -10    // ÕıÇĞº¯Êı
-#define LOG_OP -11   // ×ÔÈ»¶ÔÊı
-#define EXP_OP -12   // Ö¸Êıº¯Êı
+#define TAN_OP -10    // æ­£åˆ‡å‡½æ•°
+#define LOG_OP -11   // è‡ªç„¶å¯¹æ•°
+#define EXP_OP -12   // æŒ‡æ•°å‡½æ•°
 #define SQRT_OP -13
 #define ABS_OP -14
-#define FLOOR_OP -15 // ÏòÏÂÈ¡Õû
-#define CEIL_OP -16  // ÏòÉÏÈ¡Õû
+#define FLOOR_OP -15 // å‘ä¸‹å–æ•´
+#define CEIL_OP -16  // å‘ä¸Šå–æ•´
 #define MIN_OP -17
 #define MAX_OP -18
 char operators_string[NUM_Operators + 1] = "+-*/s%^&|tleLAFCM";
@@ -69,7 +64,7 @@ struct t_code3 {
 	// operators are stored as negative numbers -1, -2, -3...
 	int addr1, addr2;    // pointers to arguments
 };
-//¶¨Òå½á¹¹Ìå£¬»ùÒò---------------------------------------------------------------------------
+//å®šä¹‰ç»“æ„ä½“ï¼ŒåŸºå› ---------------------------------------------------------------------------
 struct t_mep_chromosome {
 	t_code3* code;        // the program - a string of genes
 	double* constants;   // an array of constants
@@ -79,7 +74,7 @@ struct t_mep_chromosome {
 	// for binary classification is computed as the number of incorrectly classified data
 	int best_index;        // the index of the best expression in chromosome
 };
-//¶¨ÒåÈ¾É«Ìå---------------------------------------------------------------------------
+//å®šä¹‰æŸ“è‰²ä½“---------------------------------------------------------------------------
 struct t_mep_parameters {
 	int code_length;             // number of instructions in a chromosome
 	int num_generations;
@@ -92,7 +87,7 @@ struct t_mep_parameters {
 	int problem_type; //0 - regression, 1 - classification
 	double classification_threshold; // for classification problems only
 };
-//²ÎÊıÅäÖÃ---------------------------------------------------------------------------
+//å‚æ•°é…ç½®---------------------------------------------------------------------------
 void allocate_chromosome(t_mep_chromosome& c, const t_mep_parameters& params)
 {
 	c.code = new t_code3[params.code_length];// the code
@@ -274,7 +269,7 @@ void compute_eval_matrix(const t_mep_chromosome& c, int code_length, int num_var
 		case MOD_OP:  // %
 			for (int k = 0; k < num_training_data; k++) {
 				if (eval_matrix[c.code[i].addr2][k] == 0) {
-					// ´¦ÀíÈ¡Ä£ÔËËãÖĞµÄ³ıÁã´íÎó
+					// å¤„ç†å–æ¨¡è¿ç®—ä¸­çš„é™¤é›¶é”™è¯¯
 					is_error_case = true;
 					break;
 				}
@@ -307,8 +302,8 @@ void compute_eval_matrix(const t_mep_chromosome& c, int code_length, int num_var
 					eval_matrix[i][k] = log(eval_matrix[c.code[i].addr1][k]);
 				}
 				else {
-					// ´¦Àí´íÎóÇé¿ö£¬ÀıÈç¶ÔÊıº¯ÊıµÄÊäÈë±ØĞë´óÓÚ0
-					eval_matrix[i][k] = -DBL_MAX; // Ê¹ÓÃ -DBL_MAX »òÆäËû·½Ê½À´±íÊ¾´íÎó
+					// å¤„ç†é”™è¯¯æƒ…å†µï¼Œä¾‹å¦‚å¯¹æ•°å‡½æ•°çš„è¾“å…¥å¿…é¡»å¤§äº0
+					eval_matrix[i][k] = -DBL_MAX; // ä½¿ç”¨ -DBL_MAX æˆ–å…¶ä»–æ–¹å¼æ¥è¡¨ç¤ºé”™è¯¯
 				}
 			}
 			break;
@@ -323,8 +318,8 @@ void compute_eval_matrix(const t_mep_chromosome& c, int code_length, int num_var
 					eval_matrix[i][k] = sqrt(eval_matrix[c.code[i].addr1][k]);
 				}
 				else {
-					// Æ½·½¸ùº¯ÊıµÄÊäÈë²»ÄÜÊÇ¸ºÊı
-					eval_matrix[i][k] = -DBL_MAX; // Ê¹ÓÃ -DBL_MAX »òÆäËû·½Ê½À´±íÊ¾´íÎó
+					// å¹³æ–¹æ ¹å‡½æ•°çš„è¾“å…¥ä¸èƒ½æ˜¯è´Ÿæ•°
+					eval_matrix[i][k] = -DBL_MAX; // ä½¿ç”¨ -DBL_MAX æˆ–å…¶ä»–æ–¹å¼æ¥è¡¨ç¤ºé”™è¯¯
 				}
 			}
 			break;
@@ -406,7 +401,7 @@ void compute_eval_matrixline(const t_mep_chromosome& d, const t_mep_chromosome& 
 		case MOD_OP:  // %
 			for (int k = 0; k < num_training_data; k++) {
 				if (eval_matrix[c.code[i].addr2][k] == 0) {
-					// ´¦ÀíÈ¡Ä£ÔËËãÖĞµÄ³ıÁã´íÎó
+					// å¤„ç†å–æ¨¡è¿ç®—ä¸­çš„é™¤é›¶é”™è¯¯
 					is_error_case = true;
 					break;
 				}
@@ -487,28 +482,28 @@ void fitness_classification(t_mep_chromosome& c, const t_mep_parameters& params,
 	int num_training_data, const double** training_data, const double* target,
 	double** eval_matrix)
 {
-	// Ê¹ÓÃÒ»¸öãĞÖµ
-	// Èç¹ûĞ¡ÓÚãĞÖµ£¬ÔòÊôÓÚÀà0
-	// ·ñÔòÊôÓÚÀà1
+	// ä½¿ç”¨ä¸€ä¸ªé˜ˆå€¼
+	// å¦‚æœå°äºé˜ˆå€¼ï¼Œåˆ™å±äºç±»0
+	// å¦åˆ™å±äºç±»1
 
-	c.fitness = 1e+308;  // ÉèÖÃÎªÒ»¸ö·Ç³£´óµÄ³õÊ¼Öµ
+	c.fitness = 1e+308;  // è®¾ç½®ä¸ºä¸€ä¸ªéå¸¸å¤§çš„åˆå§‹å€¼
 	c.best_index = -1;
 
-	compute_eval_matrix(c, params.code_length, num_variables, num_training_data, training_data, eval_matrix); // ¼ÆËãÃ¿¸ö±í´ïÊ½µÄÊä³ö
+	compute_eval_matrix(c, params.code_length, num_variables, num_training_data, training_data, eval_matrix); // è®¡ç®—æ¯ä¸ªè¡¨è¾¾å¼çš„è¾“å‡º
 
-	for (int i = 0; i < params.code_length; i++) {   // ´ÓÉÏµ½ÏÂ¶ÁÈ¡È¾É«Ìå
+	for (int i = 0; i < params.code_length; i++) {   // ä»ä¸Šåˆ°ä¸‹è¯»å–æŸ“è‰²ä½“
 		double sum_of_squared_errors = 0;
 		for (int k = 0; k < num_training_data; k++)
 		{
-			// Ê¹ÓÃ¾ù·½Îó²îÌæ´ú¾ø¶ÔÎó²î
+			// ä½¿ç”¨å‡æ–¹è¯¯å·®æ›¿ä»£ç»å¯¹è¯¯å·®
 			double error = eval_matrix[i][k] - target[k];
 			sum_of_squared_errors += error * error;
 		}
-		double mean_squared_error = sum_of_squared_errors / num_training_data;  // ¼ÆËã¾ù·½Îó²î
+		double mean_squared_error = sum_of_squared_errors / num_training_data;  // è®¡ç®—å‡æ–¹è¯¯å·®
 
-		if (c.fitness > mean_squared_error) {  // Èç¹ûµ±Ç°±í´ïÊ½µÄ¾ù·½Îó²îĞ¡ÓÚµ±Ç°×îÓÅÊÊÓ¦¶È
-			c.fitness = mean_squared_error;   // ¸üĞÂÊÊÓ¦¶ÈÎªµ±Ç°±í´ïÊ½µÄ¾ù·½Îó²î
-			c.best_index = i;                 // ¸üĞÂ×îÓÅ±í´ïÊ½µÄË÷Òı
+		if (c.fitness > mean_squared_error) {  // å¦‚æœå½“å‰è¡¨è¾¾å¼çš„å‡æ–¹è¯¯å·®å°äºå½“å‰æœ€ä¼˜é€‚åº”åº¦
+			c.fitness = mean_squared_error;   // æ›´æ–°é€‚åº”åº¦ä¸ºå½“å‰è¡¨è¾¾å¼çš„å‡æ–¹è¯¯å·®
+			c.best_index = i;                 // æ›´æ–°æœ€ä¼˜è¡¨è¾¾å¼çš„ç´¢å¼•
 		}
 	}
 }
@@ -682,29 +677,29 @@ void print_chromosomeline(const t_mep_chromosome& a, const t_mep_parameters& par
 #include <time.h>
 
 int roulette_selection(const t_mep_chromosome* population, int pop_size) {
-	// ¼ÆËã×ÜµÄÊÊÓ¦¶È
+	// è®¡ç®—æ€»çš„é€‚åº”åº¦
 	double total_fitness = 0.0;
 	for (int i = 0; i < pop_size; i++) {
 		total_fitness += population[i].fitness;
 	}
 
-	// Éú³ÉÒ»¸ö[0, total_fitness)Ö®¼äµÄËæ»úÊı
+	// ç”Ÿæˆä¸€ä¸ª[0, total_fitness)ä¹‹é—´çš„éšæœºæ•°
 	double spin = (double)rand() / RAND_MAX * total_fitness;
 
-	// ¸ù¾İËæ»úÊıÑ¡Ôñ¸öÌå
+	// æ ¹æ®éšæœºæ•°é€‰æ‹©ä¸ªä½“
 	double partial_sum = 0.0;
 	for (int i = 0; i < pop_size; i++) {
 		partial_sum += population[i].fitness;
 		if (spin < partial_sum) {
-			return i; // ·µ»ØÑ¡ÖĞµÄ¸öÌåµÄË÷Òı
+			return i; // è¿”å›é€‰ä¸­çš„ä¸ªä½“çš„ç´¢å¼•
 		}
 	}
 
-	// Èç¹ûÓÉÓÚ¸¡µãÊı¾«¶ÈÎÊÌâÃ»ÓĞ·µ»Ø£¬·µ»Ø×îºóÒ»¸ö¸öÌå
+	// å¦‚æœç”±äºæµ®ç‚¹æ•°ç²¾åº¦é—®é¢˜æ²¡æœ‰è¿”å›ï¼Œè¿”å›æœ€åä¸€ä¸ªä¸ªä½“
 	return pop_size - 1;
 }
 
-// ×¢Òâ£ºÔÚÊ¹ÓÃÂÖÅÌ¶ÄÑ¡ÔñÖ®Ç°£¬ĞèÒª³õÊ¼»¯Ëæ»úÊıÉú³ÉÆ÷
+// æ³¨æ„ï¼šåœ¨ä½¿ç”¨è½®ç›˜èµŒé€‰æ‹©ä¹‹å‰ï¼Œéœ€è¦åˆå§‹åŒ–éšæœºæ•°ç”Ÿæˆå™¨
 //---------------------------------------------------------------------------
 
 t_mep_chromosome start_steady_state_mep(t_mep_parameters& params,
@@ -817,7 +812,7 @@ bool get_next_field(char* start_sir, char list_separator, char* dest, int& size,
 	// Copy the string and check for errors
 	errno_t err = strncpy_s(dest, 10000, start_sir + skip_size, size);
 	if (err != 0) {
-		// ´¦Àí´íÎó£¬ÀıÈç·µ»Ø false
+		// å¤„ç†é”™è¯¯ï¼Œä¾‹å¦‚è¿”å› false
 		return false;
 	}
 	dest[size] = '\0';
@@ -830,7 +825,7 @@ bool read_data(const char* filename, char list_separator, double**& data, double
 	FILE* f = nullptr;
 	errno_t err = fopen_s(&f, filename, "r");
 	if (!f) {
-		// ÎÄ¼ş´ò¿ªÊ§°Ü
+		// æ–‡ä»¶æ‰“å¼€å¤±è´¥
 		num_data = 0;
 		num_variables = 0;
 		return false;
@@ -875,7 +870,7 @@ bool read_data(const char* filename, char list_separator, double**& data, double
 //---------------------------------------------------------------------------
 
 
-// Ö÷º¯Êı
+// ä¸»å‡½æ•°
 
 int main(void)
 {
@@ -902,7 +897,7 @@ int main(void)
 	int  num_variables;
 	double** training_data, * target;
 
-	if (!read_data("C:/Users/lenovo/Desktop/ÂÛÎÄ1Êı¾İ/synthetic_dataset_5.txt", ' ', training_data, target, num_training_data, num_variables)) {
+	if (!read_data("C:/Users/lenovo/Desktop/è®ºæ–‡1æ•°æ®/synthetic_dataset_5.txt", ' ', training_data, target, num_training_data, num_variables)) {
 
 		//if (!read_data("datasets/building1.txt", ' ', &training_data, target, num_training_data, num_variables)) {
 		printf("Cannot find file! Please specify the full path!");
@@ -937,4 +932,5 @@ int main(void)
 
 	return 0;
 }
+
 //--------------------------------------------------------------------
