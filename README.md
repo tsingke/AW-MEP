@@ -38,7 +38,7 @@ Symbolic regression focuses on discovering **interpretable mathematical expressi
 
 This project is licensed under the MIT License — see the LICENSE file for details.
 
- ## 🙏 Acknowledgements
+ ## Acknowledgements
 
 **We would like to express our sincere gratitude to editors and the anonymous reviewers for taking the time to review our paper.** 
 
