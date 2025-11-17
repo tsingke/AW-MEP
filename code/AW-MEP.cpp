@@ -1,3 +1,6 @@
+/**************************************************************************
+*  Algorithmï¼š AW-MEP 
+**************************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -19,9 +22,9 @@
 #define PROBLEM_BINARY_CLASSIFICATION 1
 #define MAX_SAMPLES 1000
 #define MAX_FEATURES 100
-#define NUM_Operators 14  // ¸üĞÂÎª12¸ö²Ù×÷·û
+#define NUM_Operators 14  // æ›´æ–°ä¸º12ä¸ªæ“ä½œç¬¦
 
-// »ù±¾ËãÊõ²Ù×÷·û
+// åŸºæœ¬ç®—æœ¯æ“ä½œç¬¦
 #define ADD_OP -1   // +
 #define DIF_OP -2   // -
 #define MUL_OP -3   // *
@@ -33,17 +36,17 @@
 #define EXP_OP -9   // exp
 #define SQRT_OP -10 // sqrt
 #define ABS_OP -11  // abs
-#define NEG_OP -12  // Neg (È¡Ïà·´Êı)
-#define CUBE_OP -13  // Èı´Î·½
-#define CUBEROOT_OP -14 // Á¢·½¸ù
-double initial_temperature = 100.0;  // ³õÊ¼ÎÂ¶È
-double cooling_rate = 0.99;  // ½µÎÂËÙÂÊ
-double min_temperature = 0.01;  // ×îµÍÎÂ¶È
-// ²Ù×÷·û×Ö·û´®Ó³Éä
-char operators_string[NUM_Operators + 1] = "+-*/^stlexaNcu";  // ¸üĞÂ²Ù×÷·û×Ö·û´®
+#define NEG_OP -12  // Neg (å–ç›¸åæ•°)
+#define CUBE_OP -13  // ä¸‰æ¬¡æ–¹
+#define CUBEROOT_OP -14 // ç«‹æ–¹æ ¹
+double initial_temperature = 100.0;  // åˆå§‹æ¸©åº¦
+double cooling_rate = 0.99;  // é™æ¸©é€Ÿç‡
+double min_temperature = 0.01;  // æœ€ä½æ¸©åº¦
+// æ“ä½œç¬¦å­—ç¬¦ä¸²æ˜ å°„
+char operators_string[NUM_Operators + 1] = "+-*/^stlexaNcu";  // æ›´æ–°æ“ä½œç¬¦å­—ç¬¦ä¸²
 double operator_weights[NUM_Operators];
 
-// ³õÊ¼»¯²Ù×÷·ûÈ¨ÖØ
+// åˆå§‹åŒ–æ“ä½œç¬¦æƒé‡
 
 struct gene {
 	int op;
@@ -62,8 +65,8 @@ struct chromosome {
 
 struct parameters {
 	int size;
-	int num;  //µü´ú´ÎÊı
-	int nc;  //³£Á¿¸öÊı
+	int num;  //è¿­ä»£æ¬¡æ•°
+	int nc;  //å¸¸é‡ä¸ªæ•°
 	double c_min, c_max;
 	double po, pc, pv;
 	int problem_type;  //0-regression,1-classification;
@@ -94,25 +97,25 @@ void allocate_traindata(double**& data, double*& target, int num_t, int num_v) {
 
 	target = new double[num_t];
 	if (target == NULL) {
-		throw std::bad_alloc();  // Å×³öÄÚ´æ·ÖÅäÊ§°ÜÒì³£
+		throw std::bad_alloc();  // æŠ›å‡ºå†…å­˜åˆ†é…å¤±è´¥å¼‚å¸¸
 	}
 
 	data = new double* [num_t];
 	if (data == NULL) {
-		delete[] target;  // ÇåÀíÒÑ·ÖÅäµÄÄÚ´æ
-		throw std::bad_alloc();  // Å×³öÄÚ´æ·ÖÅäÊ§°ÜÒì³£
+		delete[] target;  // æ¸…ç†å·²åˆ†é…çš„å†…å­˜
+		throw std::bad_alloc();  // æŠ›å‡ºå†…å­˜åˆ†é…å¤±è´¥å¼‚å¸¸
 	}
 
 	for (int i = 0; i < num_t; i++) {
 		data[i] = new double[num_v];
 		if (data[i] == NULL) {
-			// ÇåÀíÒÑ·ÖÅäµÄÄÚ´æ
+			// æ¸…ç†å·²åˆ†é…çš„å†…å­˜
 			for (int j = 0; j < i; j++) {
 				delete[] data[j];
 			}
 			delete[] data;
 			delete[] target;
-			throw std::bad_alloc();  // Å×³öÄÚ´æ·ÖÅäÊ§°ÜÒì³£
+			throw std::bad_alloc();  // æŠ›å‡ºå†…å­˜åˆ†é…å¤±è´¥å¼‚å¸¸
 		}
 	}
 }
@@ -176,9 +179,9 @@ void print_chromosome(const chromosome& a, const parameters& params, int num_v)
 
 void compute_eval_matrix(const chromosome& c, int l, int num_v, int num_t, const double** traindata, double** eval_matrix) {
 #pragma omp parallel for shared(c, traindata, eval_matrix)
-	for (int i = 0; i < l; i++) {  // ´ÓÉÏµ½ÏÂ¶ÁÈ¡»ùÒò
-		bool is_error_case = false; // ÓÃÀ´¼ì²é´íÎóÇé¿ö£¨ÈçÁã³ı£©
-		int error_count = 0;  // ´íÎó¼ÆÊıÆ÷
+	for (int i = 0; i < l; i++) {  // ä»ä¸Šåˆ°ä¸‹è¯»å–åŸºå› 
+		bool is_error_case = false; // ç”¨æ¥æ£€æŸ¥é”™è¯¯æƒ…å†µï¼ˆå¦‚é›¶é™¤ï¼‰
+		int error_count = 0;  // é”™è¯¯è®¡æ•°å™¨
 		switch (c.g[i].op) {
 		case ADD_OP: { // +
 #pragma omp simd
@@ -211,7 +214,7 @@ void compute_eval_matrix(const chromosome& c, int l, int num_v, int num_t, const
 					eval_matrix[i][k] = eval_matrix[c.g[i].a1][k] / denominator;
 				}
 			}
-			// ¸ù¾İ´íÎóÊıÁ¿Ôö¼ÓÊÊÓ¦¶È³Í·£
+			// æ ¹æ®é”™è¯¯æ•°é‡å¢åŠ é€‚åº”åº¦æƒ©ç½š
 			if (error_count > 0) {
 #pragma omp critical
 				c.g[i].fitness *= (1.0 + error_count / (double)num_t);
@@ -228,16 +231,16 @@ void compute_eval_matrix(const chromosome& c, int l, int num_v, int num_t, const
 			break;
 		case TAN_OP:  // tan
 			for (int k = 0; k < num_t; k++) {
-				if (eval_matrix[c.g[i].a1][k] == 0) {  // ·ÀÖ¹ tan(0) ³öÏÖ´íÎó
+				if (eval_matrix[c.g[i].a1][k] == 0) {  // é˜²æ­¢ tan(0) å‡ºç°é”™è¯¯
 					is_error_case = true;
-					eval_matrix[i][k] = 0;  // ¸³ÖµÎª0»òÕßÆäËû°²È«Öµ
+					eval_matrix[i][k] = 0;  // èµ‹å€¼ä¸º0æˆ–è€…å…¶ä»–å®‰å…¨å€¼
 				}
 				else {
 					eval_matrix[i][k] = tan(eval_matrix[c.g[i].a1][k]);
 				}
 			}
 			if (is_error_case) {
-				c.g[i].op = rand() % num_v;   // »ùÒòÍ»±äÎªÖÕ½á·û
+				c.g[i].op = rand() % num_v;   // åŸºå› çªå˜ä¸ºç»ˆç»“ç¬¦
 				for (int k = 0; k < num_t; k++)
 					eval_matrix[i][k] = traindata[k][c.g[i].op];
 			}
@@ -248,7 +251,7 @@ void compute_eval_matrix(const chromosome& c, int l, int num_v, int num_t, const
 					eval_matrix[i][k] = log(eval_matrix[c.g[i].a1][k]);
 				}
 				else {
-					eval_matrix[i][k] = -DBL_MAX;  // ´íÎó´¦Àí£¨log(¸ºÊı)£©
+					eval_matrix[i][k] = -DBL_MAX;  // é”™è¯¯å¤„ç†ï¼ˆlog(è´Ÿæ•°)ï¼‰
 				}
 			}
 			break;
@@ -262,7 +265,7 @@ void compute_eval_matrix(const chromosome& c, int l, int num_v, int num_t, const
 					eval_matrix[i][k] = sqrt(eval_matrix[c.g[i].a1][k]);
 				}
 				else {
-					eval_matrix[i][k] = -DBL_MAX;  // ´íÎó´¦Àí£¨¸ºÊı¿ª·½£©
+					eval_matrix[i][k] = -DBL_MAX;  // é”™è¯¯å¤„ç†ï¼ˆè´Ÿæ•°å¼€æ–¹ï¼‰
 				}
 			}
 			break;
@@ -270,25 +273,25 @@ void compute_eval_matrix(const chromosome& c, int l, int num_v, int num_t, const
 			for (int k = 0; k < num_t; k++)
 				eval_matrix[i][k] = fabs(eval_matrix[c.g[i].a1][k]);
 			break;
-		case NEG_OP:  // Neg (È¡Ïà·´Êı)
+		case NEG_OP:  // Neg (å–ç›¸åæ•°)
 			for (int k = 0; k < num_t; k++)
 				eval_matrix[i][k] = -eval_matrix[c.g[i].a1][k];
 			break;
-		case CUBE_OP:  // Èı´Î·½
+		case CUBE_OP:  // ä¸‰æ¬¡æ–¹
 			for (int k = 0; k < num_t; k++)
 				eval_matrix[i][k] = pow(eval_matrix[c.g[i].a1][k], 3);
 			break;
-		case CUBEROOT_OP:  // Á¢·½¸ù
+		case CUBEROOT_OP:  // ç«‹æ–¹æ ¹
 			for (int k = 0; k < num_t; k++) {
 				if (eval_matrix[c.g[i].a1][k] >= 0) {
 					eval_matrix[i][k] = cbrt(eval_matrix[c.g[i].a1][k]);
 				}
 				else {
-					eval_matrix[i][k] = -DBL_MAX;  // ´íÎó´¦Àí£¨¸ºÊı¿ªÁ¢·½¸ù£©
+					eval_matrix[i][k] = -DBL_MAX;  // é”™è¯¯å¤„ç†ï¼ˆè´Ÿæ•°å¼€ç«‹æ–¹æ ¹ï¼‰
 				}
 			}
 			break;
-		default:  // ÖÕ½á·û£¨±äÁ¿£©
+		default:  // ç»ˆç»“ç¬¦ï¼ˆå˜é‡ï¼‰
 			for (int k = 0; k < num_t; k++)
 				eval_matrix[i][k] = (c.g[i].op < num_v) ? traindata[k][c.g[i].op] : c.c[c.g[i].op - num_v];
 			break;
@@ -305,7 +308,7 @@ void fitness_regression(chromosome& c, int l, int num_v, int num_t, const double
 		double sum_of_squared_errors = 0;
 		for (int k = 0; k < num_t; k++)
 		{
-			// Ê¹ÓÃ¾ù·½Îó²îÌæ´ú¾ø¶ÔÎó²î
+			// ä½¿ç”¨å‡æ–¹è¯¯å·®æ›¿ä»£ç»å¯¹è¯¯å·®
 			double error = eval_matrix[i][k] - target[k];
 			sum_of_squared_errors += error * error;
 		}
@@ -318,7 +321,7 @@ void fitness_regression(chromosome& c, int l, int num_v, int num_t, const double
 	}
 }
 void crossover(chromosome* parent1, chromosome* parent2, chromosome* child1, chromosome* child2, const parameters* params) {
-	int cross_point = rand() % (parent1->length - 1);  // Ëæ»úÑ¡Ôñ½»²æµã
+	int cross_point = rand() % (parent1->length - 1);  // éšæœºé€‰æ‹©äº¤å‰ç‚¹
 	for (int i = 0; i < parent1->length; i++) {
 		if (i < cross_point) {
 			child1->g[i] = parent1->g[i];
@@ -336,18 +339,18 @@ void crossover(chromosome* parent1, chromosome* parent2, chromosome* child1, chr
 	}
 }
 void crossover_multipoint(chromosome* parent1, chromosome* parent2, chromosome* child1, chromosome* child2, const parameters* params, int num_points) {
-	// Ëæ»úÑ¡Ôñ¶à¸ö½»²æµã
+	// éšæœºé€‰æ‹©å¤šä¸ªäº¤å‰ç‚¹
 	int* cross_points = new int[num_points];
 	for (int i = 0; i < num_points; i++) {
-		cross_points[i] = rand() % (parent1->length - 1);  // È·±£½»²æµã²»³¬³ö»ùÒò·¶Î§
+		cross_points[i] = rand() % (parent1->length - 1);  // ç¡®ä¿äº¤å‰ç‚¹ä¸è¶…å‡ºåŸºå› èŒƒå›´
 	}
-	std::sort(cross_points, cross_points + num_points); // ¶Ô½»²æµã½øĞĞÅÅĞò
+	std::sort(cross_points, cross_points + num_points); // å¯¹äº¤å‰ç‚¹è¿›è¡Œæ’åº
 
-	bool swap = false;  // ½»Ìæ½»»»µÄ±êÖ¾
+	bool swap = false;  // äº¤æ›¿äº¤æ¢çš„æ ‡å¿—
 	int current_point = 0;
 
 	for (int i = 0; i < parent1->length; i++) {
-		// Èç¹ûµ½´ï½»²æµã£¬½»»»¸¸´ú
+		// å¦‚æœåˆ°è¾¾äº¤å‰ç‚¹ï¼Œäº¤æ¢çˆ¶ä»£
 		if (current_point < num_points && i == cross_points[current_point]) {
 			swap = !swap;
 			current_point++;
@@ -363,20 +366,20 @@ void crossover_multipoint(chromosome* parent1, chromosome* parent2, chromosome* 
 		}
 	}
 
-	delete[] cross_points;  // ÊÍ·ÅÄÚ´æ
+	delete[] cross_points;  // é‡Šæ”¾å†…å­˜
 
 	if (params->nc > 0) {
 		memcpy(child1->c, parent1->c, params->nc * sizeof(double));
 		memcpy(child2->c, parent2->c, params->nc * sizeof(double));
 	}
 }
-// Ëæ»úÑ¡ÔñÒ»¸ö»ùÒò£¬·µ»ØÖµÎª0»ò1
+// éšæœºé€‰æ‹©ä¸€ä¸ªåŸºå› ï¼Œè¿”å›å€¼ä¸º0æˆ–1
 int random_gene_selector() {
-	return rand() % 2;  // 50% µÄ¸ÅÂÊÑ¡Ôñ¸¸Ä¸Ö®Ò»µÄ»ùÒò
+	return rand() % 2;  // 50% çš„æ¦‚ç‡é€‰æ‹©çˆ¶æ¯ä¹‹ä¸€çš„åŸºå› 
 }
 void crossover_uniform(chromosome* parent1, chromosome* parent2, chromosome* child1, chromosome* child2, const parameters* params) {
 	for (int i = 0; i < parent1->length; i++) {
-		int selector = random_gene_selector();  // Ëæ»úÑ¡Ôñ¸¸´ú1»ò¸¸´ú2µÄ»ùÒò
+		int selector = random_gene_selector();  // éšæœºé€‰æ‹©çˆ¶ä»£1æˆ–çˆ¶ä»£2çš„åŸºå› 
 		if (selector == 0) {
 			child1->g[i] = parent1->g[i];
 			child2->g[i] = parent2->g[i];
@@ -392,64 +395,64 @@ void crossover_uniform(chromosome* parent1, chromosome* parent2, chromosome* chi
 		memcpy(child2->c, parent2->c, params->nc * sizeof(double));
 	}
 }
-// ¸üĞÂ²Ù×÷·ûÈ¨ÖØ
-// µ÷Õû²Ù×÷·ûÈ¨ÖØ
+// æ›´æ–°æ“ä½œç¬¦æƒé‡
+// è°ƒæ•´æ“ä½œç¬¦æƒé‡
 void initialize_operator_weights() {
 	for (int i = 0; i < NUM_Operators; i++) {
-		operator_weights[i] = 1.0;  // ËùÓĞ²Ù×÷·û³õÊ¼È¨ÖØÎª 1.0
+		operator_weights[i] = 1.0;  // æ‰€æœ‰æ“ä½œç¬¦åˆå§‹æƒé‡ä¸º 1.0
 	}
 }
 double gaussian_weight(double base_weight) {
-	double mean = 1.0;    // ¾ùÖµ
-	double stddev = 0.5;  // ±ê×¼²î
+	double mean = 1.0;    // å‡å€¼
+	double stddev = 0.5;  // æ ‡å‡†å·®
 	double exponent = -pow(base_weight - mean, 2) / (2 * pow(stddev, 2));
-	return exp(exponent);  // ¸ßË¹·Ö²¼È¨ÖØ
+	return exp(exponent);  // é«˜æ–¯åˆ†å¸ƒæƒé‡
 }
-// ¸ù¾İÈ¨ÖØÑ¡Ôñ²Ù×÷·û
+// æ ¹æ®æƒé‡é€‰æ‹©æ“ä½œç¬¦
 void adjust_operator_weights(chromosome** population, int size) {
 	for (int i = 0; i < size; i++) {
 		for (int j = 0; j < population[i]->length; j++) {
-			int op_index = -population[i]->g[j].op - 1; // »ñÈ¡²Ù×÷·ûµÄË÷Òı
+			int op_index = -population[i]->g[j].op - 1; // è·å–æ“ä½œç¬¦çš„ç´¢å¼•
 
-			// Èç¹ûµ±Ç°»ùÒòµÄÊÊÓ¦¶ÈĞ¡ÓÚ¸Ã¸öÌåµÄ×î¼ÑÊÊÓ¦¶È£¬Ôö¼Ó²Ù×÷·ûÈ¨ÖØ
+			// å¦‚æœå½“å‰åŸºå› çš„é€‚åº”åº¦å°äºè¯¥ä¸ªä½“çš„æœ€ä½³é€‚åº”åº¦ï¼Œå¢åŠ æ“ä½œç¬¦æƒé‡
 			if (population[i]->g[j].fitness < population[i]->best_fitness) {
-				operator_weights[op_index] += 0.1; // Ôö¼ÓÓĞ¹±Ï×µÄ²Ù×÷·ûµÄÈ¨ÖØ
+				operator_weights[op_index] += 0.1; // å¢åŠ æœ‰è´¡çŒ®çš„æ“ä½œç¬¦çš„æƒé‡
 			}
 			else {
-				operator_weights[op_index] *= 0.9; // ¼õÉÙÎŞ¹±Ï×µÄ²Ù×÷·ûµÄÈ¨ÖØ
+				operator_weights[op_index] *= 0.9; // å‡å°‘æ— è´¡çŒ®çš„æ“ä½œç¬¦çš„æƒé‡
 			}
 
-			// ·ÀÖ¹È¨ÖØ¹ıµÍ»ò¹ı¸ß
+			// é˜²æ­¢æƒé‡è¿‡ä½æˆ–è¿‡é«˜
 			if (operator_weights[op_index] < 0.2) operator_weights[op_index] = 0.2;
 			if (operator_weights[op_index] > 8.0) operator_weights[op_index] = 8.0;
 		}
 	}
 }
 int select_operator_based_on_weight() {
-	// ¼ÆËãËùÓĞ²Ù×÷·ûÈ¨ÖØµÄ×ÜºÍ
+	// è®¡ç®—æ‰€æœ‰æ“ä½œç¬¦æƒé‡çš„æ€»å’Œ
 	double total_weight = 0.0;
 	for (int i = 0; i < NUM_Operators; i++) {
 		total_weight += operator_weights[i];
 	}
 
-	// Éú³ÉÒ»¸ö [0, total_weight] ·¶Î§µÄËæ»úÊı
+	// ç”Ÿæˆä¸€ä¸ª [0, total_weight] èŒƒå›´çš„éšæœºæ•°
 	double random_value = (rand() / (double)RAND_MAX) * total_weight;
 	double cumulative_weight = 0.0;
 
-	// ¸ù¾İËæ»úÊıÑ¡Ôñ²Ù×÷·û
+	// æ ¹æ®éšæœºæ•°é€‰æ‹©æ“ä½œç¬¦
 	for (int i = 0; i < NUM_Operators; i++) {
 		cumulative_weight += operator_weights[i];
 		if (random_value <= cumulative_weight) {
-			return -i - 1; // ·µ»Ø²Ù×÷·û¶ÔÓ¦µÄ±àºÅ
+			return -i - 1; // è¿”å›æ“ä½œç¬¦å¯¹åº”çš„ç¼–å·
 		}
 	}
-	return ADD_OP; // Ä¬ÈÏ·µ»Ø¼Ó·¨²Ù×÷·û
+	return ADD_OP; // é»˜è®¤è¿”å›åŠ æ³•æ“ä½œç¬¦
 }
-// ¸ù¾İÈ¨ÖØÑ¡Ôñ²Ù×÷·û
+// æ ¹æ®æƒé‡é€‰æ‹©æ“ä½œç¬¦
 
 
 void generate_random_chromosome(chromosome& a, const parameters& params, int num_v) {
-	a.length = 40; // ¼ÙÉèÈ¾É«Ìå³¤¶ÈÎª40
+	a.length = 40; // å‡è®¾æŸ“è‰²ä½“é•¿åº¦ä¸º40
 	for (int c = 0; c < params.nc; c++) {
 		a.c[c] = rand() / double(RAND_MAX) * (params.c_max - params.c_min) + params.c_min;
 	}
@@ -457,36 +460,36 @@ void generate_random_chromosome(chromosome& a, const parameters& params, int num
 	double sum = params.pv + params.pc;
 	double p = rand() / (double)RAND_MAX * sum;
 	if (p <= params.pv)
-		a.g[0].op = rand() % num_v; // Ëæ»úÑ¡ÔñÒ»¸ö±äÁ¿
+		a.g[0].op = rand() % num_v; // éšæœºé€‰æ‹©ä¸€ä¸ªå˜é‡
 	else
-		a.g[0].op = num_v + rand() % params.nc; // Ëæ»úÑ¡ÔñÒ»¸ö³£Á¿
+		a.g[0].op = num_v + rand() % params.nc; // éšæœºé€‰æ‹©ä¸€ä¸ªå¸¸é‡
 
-	// Ëæ»úÑ¡ÔñºóĞø»ùÒòµÄ²Ù×÷·û
+	// éšæœºé€‰æ‹©åç»­åŸºå› çš„æ“ä½œç¬¦
 	for (int i = 1; i < a.length; i++) {
 		p = rand() / (double)RAND_MAX;
 		if (p <= params.po) {
-			a.g[i].op = select_operator_based_on_weight(); // ¸ù¾İÈ¨ÖØÑ¡Ôñ²Ù×÷·û
+			a.g[i].op = select_operator_based_on_weight(); // æ ¹æ®æƒé‡é€‰æ‹©æ“ä½œç¬¦
 		}
 		else {
 			if (p <= params.po + params.pv)
-				a.g[i].op = rand() % num_v; // Ëæ»úÑ¡Ôñ±äÁ¿
+				a.g[i].op = rand() % num_v; // éšæœºé€‰æ‹©å˜é‡
 			else
-				a.g[i].op = num_v + rand() % params.nc; // Ëæ»úÑ¡Ôñ³£Á¿
+				a.g[i].op = num_v + rand() % params.nc; // éšæœºé€‰æ‹©å¸¸é‡
 		}
 
-		// Ëæ»úÉú³É a1 ºÍ a2 »ùÒòµÄÁ¬½Ó
-		a.g[i].a1 = rand() % i;  // a1 ÊÇËæ»úÑ¡ÔñµÄ»ùÒòË÷Òı
-		a.g[i].a2 = rand() % i;  // a2 Ò²ÊÇËæ»úÑ¡ÔñµÄ»ùÒòË÷Òı
+		// éšæœºç”Ÿæˆ a1 å’Œ a2 åŸºå› çš„è¿æ¥
+		a.g[i].a1 = rand() % i;  // a1 æ˜¯éšæœºé€‰æ‹©çš„åŸºå› ç´¢å¼•
+		a.g[i].a2 = rand() % i;  // a2 ä¹Ÿæ˜¯éšæœºé€‰æ‹©çš„åŸºå› ç´¢å¼•
 
-		// ³õÊ¼»¯ÊÊÓ¦¶È
-		a.g[i].fitness = DBL_MAX; // ³õÊ¼Ê±ÉèÖÃÎªÒ»¸öºÜ´óµÄÖµ£¬µÈ´ıºóĞø¼ÆËã
+		// åˆå§‹åŒ–é€‚åº”åº¦
+		a.g[i].fitness = DBL_MAX; // åˆå§‹æ—¶è®¾ç½®ä¸ºä¸€ä¸ªå¾ˆå¤§çš„å€¼ï¼Œç­‰å¾…åç»­è®¡ç®—
 	}
 }
 
 void mutate(chromosome* ch, const parameters* params, double mutation_rate) {
 	for (int i = 0; i < ch->length; i++) {
 		if ((double)rand() / RAND_MAX < mutation_rate) {
-			ch->g[i].op = select_operator_based_on_weight(); // Ê¹ÓÃ»ùÓÚÈ¨ÖØµÄ²Ù×÷·ûÑ¡Ôñ
+			ch->g[i].op = select_operator_based_on_weight(); // ä½¿ç”¨åŸºäºæƒé‡çš„æ“ä½œç¬¦é€‰æ‹©
 			ch->g[i].a1 = rand() % (i - 1 > 0 ? i : 1);
 			ch->g[i].a2 = rand() % (i - ch->g[i].a1 > 0 ? i - ch->g[i].a1 : 1) + ch->g[i].a1;
 		}
@@ -505,7 +508,7 @@ double compute_adaptive_mutation_rate(chromosome** population, int size, double 
 	avg_fitness /= size;
 	double min_mutation_rate = 0.01;
 	double max_mutation_rate = 0.1;
-	// ×ÔÊÊÓ¦±äÒìÂÊµÄ¼ÆËã£¬»ùÓÚÆ½¾ùÊÊÓ¦¶ÈÓë×îÓÅÊÊÓ¦¶ÈµÄ²î¾à
+	// è‡ªé€‚åº”å˜å¼‚ç‡çš„è®¡ç®—ï¼ŒåŸºäºå¹³å‡é€‚åº”åº¦ä¸æœ€ä¼˜é€‚åº”åº¦çš„å·®è·
 	double diversity = (avg_fitness - min_fitness) / avg_fitness;
 	double mutation_rate = base_rate * (1 + diversity);
 	if (mutation_rate < min_mutation_rate) {
@@ -539,7 +542,7 @@ bool get_next_field(char* start_sir, char list_separator, char* dest, int& size,
 	// Copy the string and check for errors
 	errno_t err = strncpy_s(dest, 10000, start_sir + skip_size, size);
 	if (err != 0) {
-		// ´¦Àí´íÎó£¬ÀıÈç·µ»Ø false
+		// å¤„ç†é”™è¯¯ï¼Œä¾‹å¦‚è¿”å› false
 		return false;
 	}
 	dest[size] = '\0';
@@ -551,7 +554,7 @@ bool read_data(const char* filename, char list_separator, double**& data, double
 	FILE* f = nullptr;
 	errno_t err = fopen_s(&f, filename, "r");
 	if (!f) {
-		// ÎÄ¼ş´ò¿ªÊ§°Ü
+		// æ–‡ä»¶æ‰“å¼€å¤±è´¥
 		num_data = 0;
 		num_variables = 0;
 		return false;
@@ -597,7 +600,7 @@ void standardize(double**& data, int num_samples, int num_features) {
 	for (int j = 0; j < num_features; j++) {
 		double mean = 0.0, stddev = 0.0;
 
-		// ¼ÆËã¾ùÖµºÍ·½²î£¨µ¥´Î±éÀú£©
+		// è®¡ç®—å‡å€¼å’Œæ–¹å·®ï¼ˆå•æ¬¡éå†ï¼‰
 		for (int i = 0; i < num_samples; i++) {
 			mean += data[i][j];
 		}
@@ -608,16 +611,16 @@ void standardize(double**& data, int num_samples, int num_features) {
 		}
 		stddev = sqrt(stddev / num_samples);
 
-		if (stddev == 0) stddev = 1; // ·ÀÖ¹³ıÁã´íÎó
+		if (stddev == 0) stddev = 1; // é˜²æ­¢é™¤é›¶é”™è¯¯
 
-		// ±ê×¼»¯
+		// æ ‡å‡†åŒ–
 		for (int i = 0; i < num_samples; i++) {
 			data[i][j] = (data[i][j] - mean) / stddev;
 		}
 	}
 }
 
-// ¼ÆËãÆ¤¶ûÑ·Ïà¹ØÏµÊı
+// è®¡ç®—çš®å°”é€Šç›¸å…³ç³»æ•°
 double pearson_correlation(const double* x, const double* y, int n) {
 	double mean_x = 0, mean_y = 0, cov_xy = 0, var_x = 0, var_y = 0;
 
@@ -641,61 +644,61 @@ double pearson_correlation(const double* x, const double* y, int n) {
 }
 
 
-// ÌØÕ÷Ñ¡Ôñº¯Êı
+// ç‰¹å¾é€‰æ‹©å‡½æ•°
 void feature_selection(double** data, double* target, int num_samples, int num_features,
 	int* selected_features, int* num_selected, double threshold) {
-	*num_selected = 0;  // ³õÊ¼»¯ÒÑÑ¡ÌØÕ÷Êı
+	*num_selected = 0;  // åˆå§‹åŒ–å·²é€‰ç‰¹å¾æ•°
 
 	for (int j = 0; j < num_features; j++) {
 		double* feature_data = (double*)malloc(num_samples * sizeof(double));
 		if (feature_data == NULL) {
-			printf("ÄÚ´æ·ÖÅäÊ§°Ü£¡\n");
+			printf("å†…å­˜åˆ†é…å¤±è´¥ï¼\n");
 			return;
 		}
 
-		// ¸´ÖÆµÚ j ¸öÌØÕ÷µÄÊı¾İ
+		// å¤åˆ¶ç¬¬ j ä¸ªç‰¹å¾çš„æ•°æ®
 		for (int i = 0; i < num_samples; i++) {
 			feature_data[i] = data[i][j];
 		}
 
-		// ¼ÆËãÆ¤¶ûÑ·Ïà¹ØÏµÊı
+		// è®¡ç®—çš®å°”é€Šç›¸å…³ç³»æ•°
 		double corr = pearson_correlation(feature_data, target, num_samples);
 		printf("Feature %d: Pearson correlation = %f\n", j, corr);
 
-		// Ñ¡Ôñ·ûºÏãĞÖµµÄÌØÕ÷
+		// é€‰æ‹©ç¬¦åˆé˜ˆå€¼çš„ç‰¹å¾
 		if (!isnan(corr) && fabs(corr) > threshold) {
 			selected_features[*num_selected] = j;
 			(*num_selected)++;
 		}
 
-		free(feature_data);  // ÊÍ·Å¶¯Ì¬·ÖÅäµÄÄÚ´æ
+		free(feature_data);  // é‡Šæ”¾åŠ¨æ€åˆ†é…çš„å†…å­˜
 	}
 
 	if (*num_selected == 0) {
-		printf("¾¯¸æ£ºÃ»ÓĞÌØÕ÷Âú×ããĞÖµ£¬½¨Òé½µµÍ threshold\n");
+		printf("è­¦å‘Šï¼šæ²¡æœ‰ç‰¹å¾æ»¡è¶³é˜ˆå€¼ï¼Œå»ºè®®é™ä½ threshold\n");
 	}
 }
 
 void update_data_with_selected_features(double**& data, int num_samples, int num_selected, int* selected_features) {
-	// ´´½¨Ò»¸öĞÂµÄÊı¾İ¼¯£¬½ö°üº¬Ñ¡ÔñµÄÌØÕ÷
+	// åˆ›å»ºä¸€ä¸ªæ–°çš„æ•°æ®é›†ï¼Œä»…åŒ…å«é€‰æ‹©çš„ç‰¹å¾
 	double** new_data = new double* [num_samples];
 	for (int i = 0; i < num_samples; i++) {
 		new_data[i] = new double[num_selected];
 		for (int j = 0; j < num_selected; j++) {
-			new_data[i][j] = data[i][selected_features[j]];  // ½«Ñ¡ÔñµÄÌØÕ÷¸´ÖÆµ½ĞÂÊı¾İ¼¯ÖĞ
+			new_data[i][j] = data[i][selected_features[j]];  // å°†é€‰æ‹©çš„ç‰¹å¾å¤åˆ¶åˆ°æ–°æ•°æ®é›†ä¸­
 		}
 	}
 
-	// ÊÍ·ÅÔ­Ê¼Êı¾İ¼¯µÄÄÚ´æ
+	// é‡Šæ”¾åŸå§‹æ•°æ®é›†çš„å†…å­˜
 	for (int i = 0; i < num_samples; i++) {
 		delete[] data[i];
 	}
 	delete[] data;
 
-	// ¸üĞÂ data ÎªĞÂÊı¾İ¼¯
+	// æ›´æ–° data ä¸ºæ–°æ•°æ®é›†
 	data = new_data;
 }
-// ÖØĞÂ¹¹½¨Êı¾İ¾ØÕó£¬Ö»±£ÁôÑ¡ÖĞµÄÌØÕ÷
+// é‡æ–°æ„å»ºæ•°æ®çŸ©é˜µï¼Œåªä¿ç•™é€‰ä¸­çš„ç‰¹å¾
 
 int compare_fitness(const void* a, const void* b) {
 	chromosome* ch1 = *(chromosome**)a;
@@ -719,29 +722,29 @@ void select_top_half(chromosome** population, chromosome** previous_generation1,
 	delete[] all_generations;
 }
 
-// Ö÷½ø»¯¹ı³ÌÖĞµÄÈÅ¶¯ÊµÏÖ
-// ĞŞ¸ÄºóµÄº¯ÊıÇ©Ãû£¬²»ĞŞ¸ÄÔ­²ÎÊı
+// ä¸»è¿›åŒ–è¿‡ç¨‹ä¸­çš„æ‰°åŠ¨å®ç°
+// ä¿®æ”¹åçš„å‡½æ•°ç­¾åï¼Œä¸ä¿®æ”¹åŸå‚æ•°
 void increase_mutation_rate(const parameters& params) {
-	// Ôö¼Ó±äÒìÂÊ£¬×î¶àÔö¼Óµ½1.0
-	parameters& non_const_params = const_cast<parameters&>(params);  // Ç¿ÖÆ×ª»»Îª·Çconst
-	non_const_params.pv = std::min(1.0, non_const_params.pv + 0.05);  // Ôö¼Ó±äÒìÂÊ
+	// å¢åŠ å˜å¼‚ç‡ï¼Œæœ€å¤šå¢åŠ åˆ°1.0
+	parameters& non_const_params = const_cast<parameters&>(params);  // å¼ºåˆ¶è½¬æ¢ä¸ºéconst
+	non_const_params.pv = std::min(1.0, non_const_params.pv + 0.05);  // å¢åŠ å˜å¼‚ç‡
 	printf("Mutation rate increased to %f\n", non_const_params.pv);
 }
 
 void restart_population(chromosome** population, int population_size, const parameters& params, int num_v) {
-	// Çå³ıµ±Ç°ÖÖÈº
+	// æ¸…é™¤å½“å‰ç§ç¾¤
 	for (int i = 0; i < population_size; i++) {
 		delete_chromosome(*population[i]);
 		delete population[i];
 	}
 	delete[] population;
 
-	// ÖØĞÂÉú³ÉĞÂµÄÖÖÈº
+	// é‡æ–°ç”Ÿæˆæ–°çš„ç§ç¾¤
 	population = new chromosome * [population_size];
 	for (int i = 0; i < population_size; i++) {
 		population[i] = new chromosome;
 		allocate_chromosome(*population[i], params);
-		generate_random_chromosome(*population[i], params, num_v);  // ÖØĞÂÉú³ÉĞÂµÄ¸öÌå
+		generate_random_chromosome(*population[i], params, num_v);  // é‡æ–°ç”Ÿæˆæ–°çš„ä¸ªä½“
 	}
 
 	printf("Population has been restarted.\n");
@@ -756,83 +759,83 @@ int check_convergence_and_trigger_global_search(chromosome** population, int pop
 		stagnation_counter = 0;  // Reset the counter if there's improvement
 	}
 
-	// Èç¹ûÊÊÓ¦¶È±ä»¯Ğ¡ÓÚ0.5ÇÒ³¬¹ı×î´óÍ£ÖÍ´úÊı£¬½øĞĞÈ«¾ÖËÑË÷
+	// å¦‚æœé€‚åº”åº¦å˜åŒ–å°äº0.5ä¸”è¶…è¿‡æœ€å¤§åœæ»ä»£æ•°ï¼Œè¿›è¡Œå…¨å±€æœç´¢
 	if (stagnation_counter >= max_stagnation) {
-		// Ôö¼Ó±äÒì»òÕßÖØÆôÖÖÈº
+		// å¢åŠ å˜å¼‚æˆ–è€…é‡å¯ç§ç¾¤
 		printf("Stagnation detected, triggering global search...\n");
-		increase_mutation_rate(params);  // »òÕßÄã¿ÉÒÔÑ¡Ôñµ÷ÓÃÆäËûÈ«¾ÖËÑË÷²Ù×÷
-		stagnation_counter = 0;  // ÖØÖÃÍ£ÖÍ¼ÆÊıÆ÷
+		increase_mutation_rate(params);  // æˆ–è€…ä½ å¯ä»¥é€‰æ‹©è°ƒç”¨å…¶ä»–å…¨å±€æœç´¢æ“ä½œ
+		stagnation_counter = 0;  // é‡ç½®åœæ»è®¡æ•°å™¨
 	}
 
-	// ¸üĞÂlast_best_fitness
+	// æ›´æ–°last_best_fitness
 	last_best_fitness = min_fitness;
 
-	return stagnation_counter;  // ·µ»Ø¸üĞÂºóµÄ stagnation_counter
+	return stagnation_counter;  // è¿”å›æ›´æ–°åçš„ stagnation_counter
 }
 
-// Ç¿ÖÆ±äÒì£º¶Ô¸öÌå½øĞĞÈÅ¶¯
+// å¼ºåˆ¶å˜å¼‚ï¼šå¯¹ä¸ªä½“è¿›è¡Œæ‰°åŠ¨
 void random_disturbance(chromosome& individual, const parameters& params, int num_v) {
-	// Ç¿ÖÆ±äÒì£º¸Ä±ä¸öÌåµÄ²¿·Ö»ùÒò
-	int num_genes = individual.length;  // »ñÈ¡¸öÌåµÄ»ùÒò³¤¶È
-	int num_disturb = rand() % (num_genes / 2); // Ëæ»úÈÅ¶¯Ò»¶¨ÊıÁ¿µÄ»ùÒò£¨¿ÉÒÔ×Ô¶¨Òå£©
+	// å¼ºåˆ¶å˜å¼‚ï¼šæ”¹å˜ä¸ªä½“çš„éƒ¨åˆ†åŸºå› 
+	int num_genes = individual.length;  // è·å–ä¸ªä½“çš„åŸºå› é•¿åº¦
+	int num_disturb = rand() % (num_genes / 2); // éšæœºæ‰°åŠ¨ä¸€å®šæ•°é‡çš„åŸºå› ï¼ˆå¯ä»¥è‡ªå®šä¹‰ï¼‰
 
 	for (int i = 0; i < num_disturb; ++i) {
-		// Ëæ»úÑ¡Ôñ»ùÒòÎ»ÖÃ
+		// éšæœºé€‰æ‹©åŸºå› ä½ç½®
 		int gene_index = rand() % num_genes;
 
-		// ¶Ô»ùÒò½øĞĞ½Ï´óÈÅ¶¯
+		// å¯¹åŸºå› è¿›è¡Œè¾ƒå¤§æ‰°åŠ¨
 		double p = rand() / (double)RAND_MAX;
 		if (p < 0.5) {
-			// ±äÒì²Ù×÷·û£¬Ëæ»úÑ¡ÔñĞÂµÄ²Ù×÷·û
-			individual.g[gene_index].op = rand() % NUM_Operators; // Ëæ»úÑ¡ÔñÒ»¸öĞÂµÄ²Ù×÷·û
+			// å˜å¼‚æ“ä½œç¬¦ï¼Œéšæœºé€‰æ‹©æ–°çš„æ“ä½œç¬¦
+			individual.g[gene_index].op = rand() % NUM_Operators; // éšæœºé€‰æ‹©ä¸€ä¸ªæ–°çš„æ“ä½œç¬¦
 		}
 		else {
-			// ±äÒì»ùÒòÖµ£¬Ëæ»úĞŞ¸Ä³£Á¿»ò±äÁ¿
+			// å˜å¼‚åŸºå› å€¼ï¼Œéšæœºä¿®æ”¹å¸¸é‡æˆ–å˜é‡
 			if (rand() % 2 == 0) {
-				individual.g[gene_index].op = rand() % num_v;  // Ëæ»úÑ¡Ôñ±äÁ¿
+				individual.g[gene_index].op = rand() % num_v;  // éšæœºé€‰æ‹©å˜é‡
 			}
 			else {
-				individual.g[gene_index].op = num_v + rand() % params.nc;  // Ëæ»úÑ¡Ôñ³£Á¿
+				individual.g[gene_index].op = num_v + rand() % params.nc;  // éšæœºé€‰æ‹©å¸¸é‡
 			}
 		}
 
-		// ¿ÉÒÔÑ¡Ôñ¸Ä±ä»ùÒòµÄ¸¸½ÚµãÁ¬½Ó£¬ÒÔÈÅ¶¯»ùÒòÖ®¼äµÄ¹ØÏµ
+		// å¯ä»¥é€‰æ‹©æ”¹å˜åŸºå› çš„çˆ¶èŠ‚ç‚¹è¿æ¥ï¼Œä»¥æ‰°åŠ¨åŸºå› ä¹‹é—´çš„å…³ç³»
 		individual.g[gene_index].a1 = rand() % num_genes;
 		individual.g[gene_index].a2 = rand() % num_genes;
 	}
 }
 void evolve_population(chromosome** population, int population_size, const parameters& params, int num_v) {
-	// ±éÀúÖÖÈºÖĞµÄÃ¿¸ö¸öÌå
+	// éå†ç§ç¾¤ä¸­çš„æ¯ä¸ªä¸ªä½“
 	for (int i = 0; i < population_size; ++i) {
-		// ¼ÙÉèÃ¿¸ö¸öÌåÓĞÒ»¶¨¸ÅÂÊ½øĞĞÈÅ¶¯
-		double perturb_prob = 0.2; // Éè¶¨Ò»¶¨µÄÈÅ¶¯¸ÅÂÊ£¨¿ÉÒÔ¶¯Ì¬µ÷Õû£©
+		// å‡è®¾æ¯ä¸ªä¸ªä½“æœ‰ä¸€å®šæ¦‚ç‡è¿›è¡Œæ‰°åŠ¨
+		double perturb_prob = 0.2; // è®¾å®šä¸€å®šçš„æ‰°åŠ¨æ¦‚ç‡ï¼ˆå¯ä»¥åŠ¨æ€è°ƒæ•´ï¼‰
 
-		// Ëæ»ú¾ö¶¨ÊÇ·ñ¶Ô¸öÌå½øĞĞÈÅ¶¯
+		// éšæœºå†³å®šæ˜¯å¦å¯¹ä¸ªä½“è¿›è¡Œæ‰°åŠ¨
 		if (rand() / (double)RAND_MAX < perturb_prob) {
-			random_disturbance(*population[i], params, num_v);  // ¶Ô¸Ã¸öÌå½øĞĞÈÅ¶¯
+			random_disturbance(*population[i], params, num_v);  // å¯¹è¯¥ä¸ªä½“è¿›è¡Œæ‰°åŠ¨
 		}
 	}
 }
 
 
 int main() {
-	srand((unsigned int)time(NULL)); // ³õÊ¼»¯Ëæ»úÊıÉú³ÉÆ÷
-	omp_set_num_threads(1); // ÉèÖÃÏß³ÌÊı
+	srand((unsigned int)time(NULL)); // åˆå§‹åŒ–éšæœºæ•°ç”Ÿæˆå™¨
+	omp_set_num_threads(1); // è®¾ç½®çº¿ç¨‹æ•°
 
-	// ²ÎÊıÉèÖÃ
+	// å‚æ•°è®¾ç½®
 	parameters params;
-	params.size = 80;  // ÖÖÈº´óĞ¡
-	params.num = 1000;  // µü´ú´ÎÊı
-	params.nc = 10;     // ³£Á¿¸öÊı
+	params.size = 80;  // ç§ç¾¤å¤§å°
+	params.num = 1000;  // è¿­ä»£æ¬¡æ•°
+	params.nc = 10;     // å¸¸é‡ä¸ªæ•°
 	params.c_min = -10.0;
 	params.c_max = 10.0;
-	params.po = 0.9;    // ²Ù×÷·û¸ÅÂÊ
-	params.pc = 0.05;   // ³£Á¿¸ÅÂÊ
-	params.pv = 0.05;   // ±äÁ¿¸ÅÂÊ
-	params.problem_type = PROBLEM_REGRESSION;  // ÎÊÌâÀàĞÍ£º»Ø¹é
-	initialize_operator_weights(); // ³õÊ¼»¯²Ù×÷·ûÈ¨ÖØ
+	params.po = 0.9;    // æ“ä½œç¬¦æ¦‚ç‡
+	params.pc = 0.05;   // å¸¸é‡æ¦‚ç‡
+	params.pv = 0.05;   // å˜é‡æ¦‚ç‡
+	params.problem_type = PROBLEM_REGRESSION;  // é—®é¢˜ç±»å‹ï¼šå›å½’
+	initialize_operator_weights(); // åˆå§‹åŒ–æ“ä½œç¬¦æƒé‡
 
-	// ³õÊ¼»¯ÖÖÈº
+	// åˆå§‹åŒ–ç§ç¾¤
 	chromosome** population = new chromosome * [params.size];
 	chromosome** previous_generation = new chromosome * [params.size];
 	chromosome** previous_generation1 = new chromosome * [params.size];
@@ -845,20 +848,20 @@ int main() {
 		allocate_chromosome(*previous_generation1[i], params);
 	}
 
-	// ³õÊ¼»¯ÑµÁ·Êı¾İ
+	// åˆå§‹åŒ–è®­ç»ƒæ•°æ®
 	int num_tra;
 	int num_var;
 	double** traindata;
 	double* target;
-	if (!read_data("C:/Users/lenovo/Desktop/ÂÛÎÄ1Êı¾İ/synthetic_dataset_5.txt", ' ', traindata, target, num_tra, num_var)) {
+	if (!read_data("C:/Users/lenovo/Desktop/è®ºæ–‡1æ•°æ®/synthetic_dataset_5.txt", ' ', traindata, target, num_tra, num_var)) {
 		printf("Cannot find file! Please specify the full path!");
 		getchar();
 		return 1;
 	}
-	// ÌØÕ÷Ñ¡Ôñ£¨Ìí¼ÓÊµ¼ÊÊı¾İ¸üĞÂ£©
+	// ç‰¹å¾é€‰æ‹©ï¼ˆæ·»åŠ å®é™…æ•°æ®æ›´æ–°ï¼‰
 	
 
-	// ¼ÙÉè num_selected ºÍ selected_features ÒÑ¾­ÔÚ feature_selection ÖĞµÃµ½ÁË¸üĞÂ
+	// å‡è®¾ num_selected å’Œ selected_features å·²ç»åœ¨ feature_selection ä¸­å¾—åˆ°äº†æ›´æ–°
 
 	double*** eval_matrix = new double** [params.size];
 	for (int i = 0; i < params.size; i++) {
@@ -867,11 +870,11 @@ int main() {
 			eval_matrix[i][j] = new double[num_tra];
 		}
 	}
-	double min_fitness = DBL_MAX; // ÓÃÀ´´æ´¢×îÓÅÊÊÓ¦¶È
+	double min_fitness = DBL_MAX; // ç”¨æ¥å­˜å‚¨æœ€ä¼˜é€‚åº”åº¦
 
-	// Ö´ĞĞÒÅ´«Ëã·¨
+	// æ‰§è¡Œé—ä¼ ç®—æ³•
 	for (int gen = 1; gen <= 2; gen++) {
-		// µÚÒ»´úºÍµÚ¶ş´úµÄ´¦Àí
+		// ç¬¬ä¸€ä»£å’Œç¬¬äºŒä»£çš„å¤„ç†
 		for (int i = 0; i < params.size; i++) {
 			generate_random_chromosome(*population[i], params, num_var);
 		}
@@ -896,12 +899,12 @@ int main() {
 		printf("Generation %d, best fitness = %lf\n", gen, min_fitness);
 	}
 
-	// ´ÓµÚÈı´ú¿ªÊ¼µÄÒÅ´«Ëã·¨²Ù×÷
+	// ä»ç¬¬ä¸‰ä»£å¼€å§‹çš„é—ä¼ ç®—æ³•æ“ä½œ
 	int stagnation_counter = 0;
 	double last_best_fitness = DBL_MAX;
 
 	for (int gen = 3; gen <= params.num; gen++) {
-		// Ñ¡Ôñ²Ù×÷
+		// é€‰æ‹©æ“ä½œ
 		select_top_half(population, previous_generation1, previous_generation, params.size, params, num_var);
 		for (int i = 0; i < params.size; i++) {
 			fitness_regression(*population[i], population[i]->length, num_var, num_tra, (const double**)traindata, target, eval_matrix[i]);
@@ -912,36 +915,36 @@ int main() {
 
 		last_best_fitness = min_fitness;
 
-		// ½»²æ²Ù×÷
+		// äº¤å‰æ“ä½œ
 		for (int i = 0; i < params.size; i++) {
 			if ((i % 2) == 0) {
-				// Ëæ»úÑ¡ÔñÁ½¸ö¸öÌå½øĞĞ½»²æ
+				// éšæœºé€‰æ‹©ä¸¤ä¸ªä¸ªä½“è¿›è¡Œäº¤å‰
 				int random_index1 = rand() % params.size;
 				int random_index2 = rand() % params.size;
 
-				// È·±£Á½¸öËæ»ú¸öÌå²»ÏàÍ¬
+				// ç¡®ä¿ä¸¤ä¸ªéšæœºä¸ªä½“ä¸ç›¸åŒ
 				while (random_index1 == random_index2) {
 					random_index2 = rand() % params.size;
 				}
 
-				// ´´½¨×Ó´ú
+				// åˆ›å»ºå­ä»£
 				chromosome* child1 = new chromosome;
 				chromosome* child2 = new chromosome;
 				allocate_chromosome(*child1, params);
 				allocate_chromosome(*child2, params);
 
-				// Ëæ»úÑ¡Ôñ½»²æ·½Ê½£ºµ¥µã½»²æ¡¢¶àµã½»²æ»ò¾ùÔÈ½»²æ
-				int crossover_type = rand() % 3;  // Ëæ»úÑ¡Ôñ½»²æÀàĞÍ£¨0:µ¥µã½»²æ£¬1:¶àµã½»²æ£¬2:¾ùÔÈ½»²æ£©
+				// éšæœºé€‰æ‹©äº¤å‰æ–¹å¼ï¼šå•ç‚¹äº¤å‰ã€å¤šç‚¹äº¤å‰æˆ–å‡åŒ€äº¤å‰
+				int crossover_type = rand() % 3;  // éšæœºé€‰æ‹©äº¤å‰ç±»å‹ï¼ˆ0:å•ç‚¹äº¤å‰ï¼Œ1:å¤šç‚¹äº¤å‰ï¼Œ2:å‡åŒ€äº¤å‰ï¼‰
 
 				if (crossover_type == 0) {
-					crossover(population[random_index1], population[random_index2], child1, child2, &params);  // µ¥µã½»²æ
+					crossover(population[random_index1], population[random_index2], child1, child2, &params);  // å•ç‚¹äº¤å‰
 				}
 				else if (crossover_type == 1) {
-					int num_points = rand() % 3 + 1;  // Ëæ»úÑ¡Ôñ1µ½3¸ö½»²æµã
-					crossover_multipoint(population[random_index1], population[random_index2], child1, child2, &params, num_points);  // ¶àµã½»²æ
+					int num_points = rand() % 3 + 1;  // éšæœºé€‰æ‹©1åˆ°3ä¸ªäº¤å‰ç‚¹
+					crossover_multipoint(population[random_index1], population[random_index2], child1, child2, &params, num_points);  // å¤šç‚¹äº¤å‰
 				}
 				else {
-					crossover_uniform(population[random_index1], population[random_index2], child1, child2, &params);  // ¾ùÔÈ½»²æ
+					crossover_uniform(population[random_index1], population[random_index2], child1, child2, &params);  // å‡åŒ€äº¤å‰
 				}
 				fitness_regression(*child1, population[i]->length, num_var, num_tra, (const double**)traindata, target, eval_matrix[i]);
 				fitness_regression(*child2, population[i]->length, num_var, num_tra, (const double**)traindata, target, eval_matrix[i]);
@@ -957,9 +960,9 @@ int main() {
 			}
 		}
 
-		// ±äÒì²Ù×÷
+		// å˜å¼‚æ“ä½œ
 
-		// ±äÒìÂÊµ÷Õû
+		// å˜å¼‚ç‡è°ƒæ•´
 		double base_mutation_rate = 0.15 * (1.0 - gen / (double)params.num);
 		double adaptive_mutation_rate = compute_adaptive_mutation_rate(population, params.size, base_mutation_rate);
 		for (int i = 0; i < params.size; i++) {
@@ -976,7 +979,7 @@ int main() {
 			delete child3;
 		}
 
-		evolve_population(population, params.size, params, num_var);  // ÔÚÃ¿Ò»´úºóÖ´ĞĞÈÅ¶¯
+		evolve_population(population, params.size, params, num_var);  // åœ¨æ¯ä¸€ä»£åæ‰§è¡Œæ‰°åŠ¨
 		adjust_operator_weights(population, params.size);
 		for (int i = 0; i < params.size; i++) {
 			fitness_regression(*population[i], population[i]->length, num_var, num_tra, (const double**)traindata, target, eval_matrix[i]);
@@ -985,7 +988,7 @@ int main() {
 			}
 		}
 
-		// ¸üĞÂÉÏÒ»´úºÍÇ°Ò»´ú
+		// æ›´æ–°ä¸Šä¸€ä»£å’Œå‰ä¸€ä»£
 		for (int i = 0; i < params.size; i++) {
 			copy_individual(*previous_generation1[i], *previous_generation[i], params);
 			copy_individual(*previous_generation[i], *population[i], params);
@@ -993,7 +996,7 @@ int main() {
 		printf("Generation %d, best fitness = %lf\n", gen, min_fitness/5.5);
 	}
 
-	// Êä³ö×î¼Ñ¸öÌå
+	// è¾“å‡ºæœ€ä½³ä¸ªä½“
 	chromosome* best = NULL;
 	double best_fitness = DBL_MAX;
 	for (int i = 0; i < params.size; i++) {
@@ -1007,7 +1010,7 @@ int main() {
 		print_chromosome(*best, params, num_var);
 	}
 
-	// ÇåÀí×ÊÔ´
+	// æ¸…ç†èµ„æº
 	for (int i = 0; i < params.size; i++) {
 		for (int j = 0; j < population[i]->length; j++) {
 			delete[] eval_matrix[i][j];
@@ -1024,4 +1027,5 @@ int main() {
 	delete_traindata(traindata, target, num_tra);
 
 	return 0;
+
 }
