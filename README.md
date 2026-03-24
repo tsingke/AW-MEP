@@ -3,7 +3,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/tsingke/AW-MEP) [![GitHub stars](https://img.shields.io/github/stars/tsingke/AW-MEP.svg)](https://github.com/tsingke/AW-MEP/stargazers)  
 
-**Title**: Adaptive Weighted Multi-Expression Programming
+**Title**: Adaptive Weighted Multi-Expression Programming with a Self-Regulating Evolutionary Framework for Symbolic Regression
 
 ```
  Authors：Xin Yin, Qingke Zhang*，Xiaolin Wang, Lingyu Lv, Na Wang, Shengnan Zhang, Shuang Gao, Huaxiang Zhang
