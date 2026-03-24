@@ -54,6 +54,4 @@ This project is licensed under the MIT License — see the LICENSE file for deta
 
  ## 6. Acknowledgements
 
-**We would like to express our sincere gratitude to editors and the anonymous reviewers for taking the time to review our paper.** 
-
-This work is supported by the National Natural Science Foundation of China (Grant No. 62006144) 
+**We would like to express our sincere gratitude to editors and the anonymous reviewers for taking the time to review our paper.** This work is supported by the National Natural Science Foundation of China (Grant No. 62006144) 
