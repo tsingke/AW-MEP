@@ -7,7 +7,7 @@ Adaptive Weighted Multi-Expression Programming for Symbolic Regression
 **Title**: Adaptive Weighted Multi-Expression Programming
 
 ```
- Authors：Xin Yin, Qingke Zhang*
+ Authors：Xin Yin, Qingke Zhang*，Xiaolin Wang, Lingyu Lv, Na Wang, Shengnan Zhang, Shuang Gao, Huaxiang Zhang
 ```
 > School of Computer Science and Artificial Intelligence, Shandong Normal University, Jinan 250358, China
 > 
